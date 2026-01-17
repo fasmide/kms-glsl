@@ -39,7 +39,7 @@ static const struct egl *egl;
 static const struct gbm *gbm;
 static const struct drm *drm;
 
-static const char *shortopts = "aAC:D:f:hm:n:p:v:x";
+static const char *shortopts = "aAC:D:f:hHm:n:p:v:x";
 
 static const struct option longopts[] = {
 		{"async",        no_argument,       0, 'a'},
@@ -48,6 +48,7 @@ static const struct option longopts[] = {
 		{"device",       required_argument, 0, 'D'},
 		{"format",       required_argument, 0, 'f'},
 		{"help",         no_argument,       0, 'h'},
+		{"hud",          no_argument,       0, 'H'},
 		{"modifier",     required_argument, 0, 'm'},
 		{"frames",       required_argument, 0, 'n'},
 		{"perfcntr",     required_argument, 0, 'p'},
@@ -57,7 +58,7 @@ static const struct option longopts[] = {
 };
 
 static void usage(const char *name) {
-	printf("Usage: %s [-aACDfmnpvx] <shader_file>\n"
+	printf("Usage: %s [-aACDfhHmnpvx] <shader_file>\n"
 	       "\n"
 	       "options:\n"
 	       "    -a, --async              use async page flipping\n"
@@ -66,6 +67,7 @@ static void usage(const char *name) {
 	       "    -D, --device=DEVICE      use the given device\n"
 	       "    -f, --format=FOURCC      framebuffer format\n"
 	       "    -h, --help               print usage\n"
+	       "    -H, --hud                show HUD (FPS, power, filename)\n"
 	       "    -m, --modifier=MODIFIER  hardcode the selected modifier\n"
 	       "    -n, --frames=N           run for the given number of frames and exit\n"
 	       "    -p, --perfcntr=LIST      sample specified performance counters using\n"
@@ -145,7 +147,7 @@ int init(const char *shadertoy, const struct options *options) {
 		return -1;
 	}
 
-	ret = init_shadertoy(gbm, egl, shadertoy);
+	ret = init_shadertoy(gbm, (struct egl *)egl, shadertoy, options);
 	if (ret < 0) {
 		return -1;
 	}
@@ -164,6 +166,7 @@ int main(int argc, char *argv[]) {
 			.connector = -1,
 			.frames = 0,
 			.mode = "",
+			.show_hud = false,
 	};
 
 	int ret;
@@ -184,6 +187,9 @@ int main(int argc, char *argv[]) {
 				break;
 			case 'D':
 				options.device = optarg;
+				break;
+			case 'H':
+				options.show_hud = true;
 				break;
 			case 'f': {
 				char fourcc[4] = "    ";

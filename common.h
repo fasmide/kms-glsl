@@ -112,6 +112,7 @@ struct options {
 	bool async_page_flip;
 	bool atomic_drm_mode;
 	bool surfaceless;
+	bool show_hud;
 	unsigned int vrefresh;
 	unsigned int frames;
 };
@@ -169,7 +170,7 @@ struct egl {
 	EGLuint64KHR *modifiers;
 	EGLint num_modifiers;
 
-	void (*draw)(uint64_t start_time, unsigned frame);
+	void (*draw)(uint64_t start_time, unsigned frame, float fps);
 };
 
 static inline int __egl_check(void *ptr, const char *name)
@@ -188,7 +189,7 @@ const struct egl * init_egl(const struct gbm *gbm, uint64_t modifier, bool surfa
 int create_program(const char *vs_src, const char *fs_src);
 int link_program(unsigned program);
 
-int init_shadertoy(const struct gbm *gbm, struct egl *egl, const char *shadertoy);
+int init_shadertoy(const struct gbm *gbm, struct egl *egl, const char *shadertoy, const struct options *options);
 
 void init_perfcntrs(const struct egl *egl, const char *perfcntrs);
 void start_perfcntrs(void);

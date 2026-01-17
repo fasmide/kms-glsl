@@ -183,7 +183,16 @@ static int atomic_run(const struct gbm *gbm, const struct egl *egl)
 			glBindFramebuffer(GL_FRAMEBUFFER, egl->fbs[frame % NUM_BUFFERS].fb);
 		}
 
-		egl->draw(start_time, i++);
+		// Calculate current FPS
+		float fps = 0.0f;
+		if (i > 1) {
+			uint64_t elapsed = get_time_ns() - start_time;
+			if (elapsed > 0) {
+				fps = (float)((i - 1) * NSEC_PER_SEC) / (float)elapsed;
+			}
+		}
+
+		egl->draw(start_time, i++, fps);
 
 		/* Block until all the buffered GL operations are completed.
 		 * This is required on NVIDIA GPUs, for which the DRM drivers
